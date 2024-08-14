@@ -45,22 +45,6 @@ int arr_max(struct sum_arr *arr){
    return max_loc
 }
 
-void split_img_vertically(struct rgb_img *im, struct sum_arr *col_sums, struct sum_arr **new_img1, struct sum_arr **new_img2){
-   int split_index = arr_max(col_sums);
-   create_img(new_img1, im->height, split_index - 1);
-   create_img(new_img2, im->height, im->width - split_index);
-   for( int y = 0; y < im->height; y++){
-      for(int x = 0; x < split_index; x++){
-         set_pixel(*im, y, x, get_pixel(*im, y, x, 0), get_pixel(im, y, x, 1), get_pixel(*im, y, x, 2))
-      }
-   }
-   for( int y = 0; y < im->height; y++){
-      for(int x = split_index + 1; x < im->width; x++){
-         set_pixel(*im, y, x, get_pixel(*im, y, x, 0), get_pixel(im, y, x, 1), get_pixel(*im, y, x, 2))
-      }
-   }
-}
-
 void get_row_sums(struct rgb_img *im, struct sum_arr **row_sums){
     create_sum_arr(row_sums, im->height);
     for(int y = 0; y < im->height; y++){
@@ -77,6 +61,31 @@ void show_arr_sums(struct sum_arr *arr){
         printf("value = %f | row= %d \n", arr->columns[i], i);
     }
     printf("---------------------\n");
+}
+
+void split_img_vertically(struct rgb_img *im, struct sum_arr *col_sums, struct sum_arr **new_img1, struct sum_arr **new_img2){
+   int split_index = arr_max(col_sums);
+   create_img(new_img1, im->height, split_index - 1);
+   create_img(new_img2, im->height, im->width - split_index);
+   for( int y = 0; y < im->height; y++){
+      for(int x = 0; x < split_index; x++){
+         set_pixel(*im, y, x, get_pixel(*im, y, x, 0), get_pixel(im, y, x, 1), get_pixel(*im, y, x, 2));
+      }
+   }
+   for( int y = 0; y < im->height; y++){
+      for(int x = split_index + 1; x < im->width; x++){
+         set_pixel(*im, y, x, get_pixel(*im, y, x, 0), get_pixel(im, y, x, 1), get_pixel(*im, y, x, 2));
+      }
+   }
+}
+
+void create_image_chunks(struct rgb_img *im){
+   struct sum_arr *row_sums;
+   get_row_sums(im, &row_sums);
+   max = 0 
+   for(int i = 0; i < (*row_sums)->length; i++){
+      
+   }
 }
 
 void free_im(struct rgb_img *im){
