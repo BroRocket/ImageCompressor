@@ -9,7 +9,6 @@ void create_img(struct rgb_img **im, size_t height, size_t width){
     (*im)->raster = (uint8_t *)malloc(3 * height * width);
 }
 
-
 int read_2bytes(FILE *fp){
     uint8_t bytes[2];
     fread(bytes, sizeof(uint8_t), 1, fp);
@@ -57,7 +56,6 @@ void destroy_image(struct rgb_img *im)
     free(im->raster);
     free(im);
 }
-
 
 void print_grad(struct rgb_img *grad){
     int height = grad->height;
