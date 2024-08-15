@@ -8,8 +8,8 @@
 #include "c_img.h"
 #include "c_img.c"
 
-struct sum_arr{
-    double *columns;
+struct double_arr{
+    double *data;
     size_t length;
 };
 
