@@ -10,6 +10,11 @@ void free_dbl_arr(struct double_arr *arr){
     free(arr);
 }
 
+void free_int_arr(struct int_arr *arr){
+    free(arr->data);
+    free(arr);
+}
+
 void free_im(struct rgb_img *im){
     free(im->raster);
     free(im);
@@ -81,7 +86,6 @@ void get_col_sums(struct rgb_img *im, struct double_arr **col_sums){
                 (*col_sums)->data[x] = 1;
             }
         }
-        // (*col_sums)->data[x] /= im->height;
     }
 }
 
@@ -108,25 +112,10 @@ void clean_data(struct double_arr *arr){
     }
 }
 
-void get_sum_gradient(struct double_arr *arr){
-    struct double_arr *temp;
-    create_double_arr(&temp, arr->length);
-    for(int i = 0; i < 5; i++){
-        temp->data[i] = 0;
-    }
-    for(int i = 5; i < arr->length - 5; i++){
-        temp->data[i] = abs(arr->data[i-5] - arr->data[i]) + abs(arr->data[i-1] - arr->data[i]) + abs(arr->data[i] - arr->data[i + 1]) + abs(arr->data[i] - arr->data[i+5]);
-    }
-    for(int i = arr->length - 5; i < arr->length; i++){
-        temp->data[i] = 0;
-    }
-    memcpy(arr->data, temp->data, sizeof(double) * temp->length);
-    free_dbl_arr(temp);
-} 
 
 void transition_indexes(struct double_arr *arr, struct int_arr **locs){
-    double cur_val = arr->data[0];
     create_int_arr(locs, 20);
+    double cur_val = arr->data[0];
     int index = 0;
 
     for(int i = 0; i < arr->length; i++){
@@ -173,43 +162,35 @@ void show_arr_sums(struct double_arr *arr){
 }
 
 void split_img_vertically(struct rgb_img *im, struct double_arr *col_sums, struct image_batch **img_batch){
-    struct int_arr **locs;
-    transition_indexes(col_sums, locs);
-    for(int i = 0; i < (*locs)->length; i++){
-        printf("%d \n", (*locs)->data[i]);
-    }
+    struct int_arr *locs = NULL;
+    transition_indexes(col_sums, &locs);
+    
+    // for(int i = 0; i < locs->length; i++){
+    //     printf("%d \n", locs->data[i]);
+    // }
 
-    create_img_batch(img_batch, (*locs)->length);
-    for(int i = 0; i < (*locs)->length; i++){
-        create_img(&((*img_batch)->imgs[i]), im->height, (*locs)->data[0]);
+    int slice_index = 0;
+    create_img_batch(img_batch, locs->length/2);
+    for(int i = 0; i < locs->length; i+=2){
 
+        size_t start_col = locs->data[i];         
+        size_t end_col = locs->data[i + 1];       
+        size_t slice_width = end_col - start_col; 
+
+        create_img(&((*img_batch)->imgs[slice_index]), im->height, slice_width);
+
+        // Copy the pixels from the original image to the slice
         for (int y = 0; y < im->height; y++) {
-            for (int x = 0; x < (*locs)->data[0]; x++) {
-                set_pixel((*img_batch)->imgs[i], y, x,
-                        get_pixel(im, y, x, 0),
-                        get_pixel(im, y, x, 1),
-                        get_pixel(im, y, x, 2));
+            for (int x = 0; x < slice_width; x++) {
+                set_pixel((*img_batch)->imgs[slice_index], y, x,
+                          get_pixel(im, y, start_col + x, 0),
+                          get_pixel(im, y, start_col + x, 1),
+                          get_pixel(im, y, start_col + x, 2));
             }
         }
-
-        struct double_arr *temp;
-        create_double_arr(&temp, col_sums->length - (*locs)->data[0]);
-        memcpy(temp->data, col_sums->data+(*locs)->data[0], sizeof(double) * (temp->length - (*locs)->data[0]));
-
-        col_sums->length = temp->length;
-        double* ptr = realloc(col_sums->data, sizeof(double) * (col_sums->length));
-        if (ptr == NULL) {
-            fprintf(stderr, "Memory reallocation failed\n");
-            exit(1);
-        }
-        col_sums->data = ptr;
-        memcpy(col_sums->data, temp->data, sizeof(double) * (col_sums->length));
-
-        free_dbl_arr(temp);
+        slice_index++;
     }
-
-    // create_img(new_img1, im->height, (*locs)->data[0]);
-    // //create_img(new_img2, im->height, im->width - (*locs)->data[0]); 
+    free_int_arr(locs);
   
 }
 // void create_image_chunks(struct rgb_img *im){
@@ -247,15 +228,33 @@ int main(){
     // Splitting the image 
     struct image_batch *images;
     split_img_vertically(im, col_sums, &images);
-    for(int i = 0; i < images->length; i++){
-        write_img(images->imgs[i], "res.bin");
+    for (size_t i = 0; i < images->length; i++) {
+        char filename[256]; // Buffer for the dynamic filename
+        sprintf(filename, "split_image_%zu.bin", i); // Create a unique filename
+        write_img(images->imgs[i], filename);        // Write the image to the file
     }
-    
     
 
     free_img_batch(images);
     free_dbl_arr(col_sums);
     free_dbl_arr(row_sums);
+    destroy_image(im);
 
     return 0;
 }
+
+// void get_sum_gradient(struct double_arr *arr){
+//     struct double_arr *temp;
+//     create_double_arr(&temp, arr->length);
+//     for(int i = 0; i < 5; i++){
+//         temp->data[i] = 0;
+//     }
+//     for(int i = 5; i < arr->length - 5; i++){
+//         temp->data[i] = abs(arr->data[i-5] - arr->data[i]) + abs(arr->data[i-1] - arr->data[i]) + abs(arr->data[i] - arr->data[i + 1]) + abs(arr->data[i] - arr->data[i+5]);
+//     }
+//     for(int i = arr->length - 5; i < arr->length; i++){
+//         temp->data[i] = 0;
+//     }
+//     memcpy(arr->data, temp->data, sizeof(double) * temp->length);
+//     free_dbl_arr(temp);
+// } 
