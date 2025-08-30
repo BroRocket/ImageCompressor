@@ -8,7 +8,7 @@
             "args": [
                 "-g",                        // include debug symbols
                 "main.cpp",                  // main file
-                "image.cpp",                 // your class implementation
+                "Image.cpp",                 // your class implementation
                 "-o",
                 "main.exe",                  // output executable
                 "-std=c++17"                 // C++ standard

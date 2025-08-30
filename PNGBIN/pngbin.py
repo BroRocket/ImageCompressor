@@ -6,6 +6,7 @@ from PIL import Image
 class PNGBIN():
     def __init__(self, signature: str = "HOWARDPNGBIN"):
         self.__SIGNATURE = bytes(signature, "utf-8")
+        self.__mode_map = {1: "L", 3: "RGB", 4: "RGBA"}
 
     def to_bin(self, image_filepath: str, bin_filename:str|None = None, mode: str|None = None, compression: int = 0) -> None:
         """
@@ -27,8 +28,12 @@ class PNGBIN():
         img = image.convert(mode)
 
         # encode mode as byte
-        mode_map = {"L": 0, "RGB": 1, "RGBA": 2}
-        mode_byte = mode_map[mode]
+        #mode_map = {"L": 1, "RGB": 3, "RGBA": 4}
+        for key, value in self.__mode_map.items():
+            if value == mode:
+                mode_byte = key
+                break
+        #mode_byte = mode_map[mode]
 
         # extract raw pixel data
         # img_raster = []
@@ -75,10 +80,10 @@ class PNGBIN():
             data = f.read()
 
         # decode mode
-        mode_map = {0: "L", 1: "RGB", 2: "RGBA"}
-        if mode_byte not in mode_map:
+        #mode_map = {1: "L", 3: "RGB", 4: "RGBA"}
+        if mode_byte not in self.__mode_map:
             raise ValueError(f"Unknown mode byte: {mode_byte}")
-        mode = mode_map[mode_byte]
+        mode = self.__mode_map[mode_byte]
 
         # decompress if needed
         if compression == 1:
@@ -118,3 +123,13 @@ if __name__ == "__main__":
     converter = PNGBIN()
     converter.to_bin("/Users/Brody Howard/Documents/GitHub/ImageCompressor/RECEIPT.png", mode = "L")
     converter.show("RECEIPT.bin")
+    # with open("/Users/Brody Howard/Documents/GitHub/ImageCompressor/RECEIPT.bin", "rb") as f:
+    #         sig = f.read(len("HOWARDPNGBIN"))
+    #         if sig != "HOWARDPNGBIN":
+    #             raise ValueError(f"Invalid file format: missing {self.__SIGNATURE.decode(encoding='utf-8')} signature")
+
+    #         mode_byte = int.from_bytes(f.read(1), "big")
+    #         height = int.from_bytes(f.read(2), "big")
+    #         width = int.from_bytes(f.read(2), "big")
+    #         compression = int.from_bytes(f.read(1), "big")
+    #         data = f.read()
