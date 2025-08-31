@@ -9,6 +9,7 @@
                 "-g",                        // include debug symbols
                 "main.cpp",                  // main file
                 "Image.cpp",                 // your class implementation
+                "ImageSplitter.cpp",
                 "-o",
                 "main.exe",                  // output executable
                 "-std=c++17"                 // C++ standard

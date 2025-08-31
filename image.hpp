@@ -14,7 +14,7 @@ private:
     int compression;     // 0 = none, 1 = compressed (you can define later)
 
 public:
-    Image(size_t h = 0, size_t w = 0, uint8_t c = 3, const std::string& sig = "HOWARDPNGBIN");
+    Image(size_t h = 0, size_t w = 0, uint8_t c = 1, const std::string& sig = "HOWARDPNGBIN");
 
     void read(const std::string& filename);
     void write(const std::string& filename) const;
@@ -32,4 +32,7 @@ public:
     size_t getHeight() const;
     uint8_t getChannels() const;
     int getCompression() const;
+    void setRaster(std::vector<uint8_t>&& newRaster) {
+        raster = std::move(newRaster);
+    }
 };

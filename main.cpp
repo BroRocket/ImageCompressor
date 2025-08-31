@@ -1,10 +1,16 @@
 #include "Image.hpp"
+#include "ImageSplitter.hpp"
+#include <iostream>
 
 
 int main() {
     Image img(0, 0, 1, "HOWARDPNGBIN");  // specify the signature
     img.read("RECEIPT.bin");
-    img.printGray();
+    //img.printGray();
+    ImageSplitter splitter(img);
+    size_t loc = splitter.column_projection(img);
+    std::cout << loc;
+
 
     return 0;
 }

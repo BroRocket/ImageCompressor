@@ -13,6 +13,7 @@ size_t Image::getHeight() const { return height; }
 uint8_t Image::getChannels() const { return channels; }
 int Image::getCompression() const { return compression; }
 
+
 // Read from .bin file
 void Image::read(const std::string& filename) {
     std::ifstream in(filename, std::ios::binary);
@@ -75,7 +76,7 @@ void Image::write(const std::string& filename) const {
 }
 
 // getPixel
-uint8_t Image::getPixel(size_t y, size_t x, uint8_t color_index = 0) const {
+uint8_t Image::getPixel(size_t y, size_t x, uint8_t color_index) const {
     if (y >= height || x >= width || color_index >= channels) 
         throw std::out_of_range("Pixel index out of range");
     return raster[channels * (y * width + x) + color_index];
@@ -97,7 +98,7 @@ void Image::setPixel(size_t y, size_t x, uint8_t r, uint8_t g, uint8_t b) {
 // printGray
 void Image::printGray() const {
     if (channels != 1) throw std::runtime_error("printGray only works for grayscale images");
-    for (size_t i = 0; i < 50; ++i) {
+    for (size_t i = 0; i < height; ++i) {
         for (size_t j = 0; j < width; ++j) {
             std::cout << static_cast<int>(raster[i * width + j]) << "|";// << "\t";
         }
@@ -130,7 +131,7 @@ int Image::sumRow(size_t y) const {
             sum += getPixel(y, x, 0);
         }
     } else {
-        throw std::runtime_error("Cannot sum column for the image storgae mode: " + channels);
+        throw std::runtime_error("Cannot sum column for the image storgae mode: " + std::to_string(channels));
     }
     return sum;
 };
@@ -146,7 +147,7 @@ int Image::sumColumn(size_t x) const {
             sum += getPixel(y, x, 0);
         }
     } else {
-        throw std::runtime_error("Cannot sum column for the image storgae mode: " + channels);
+        throw std::runtime_error("Cannot sum column for the image storgae mode: " + std::to_string(channels));
     }
     return sum;
 };
